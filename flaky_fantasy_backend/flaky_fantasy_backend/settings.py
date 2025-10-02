@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'flaky_fantasy_backend_api', 
+     'django_filters',
 ]
 
 MIDDLEWARE = [
