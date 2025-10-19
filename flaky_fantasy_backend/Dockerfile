@@ -5,7 +5,7 @@ FROM python:3.11.5-slim-bullseye
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-ENV DJANGO_SETTINGS_MODULE=pharmacy_backend.settings
+ENV DJANGO_SETTINGS_MODULE=flaky_fantasy_backend.settings
 
 # Set the working directory in the container
 WORKDIR /code
