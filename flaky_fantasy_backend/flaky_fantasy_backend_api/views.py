@@ -13,7 +13,7 @@ from .models import (
 )
 from .serializers import (
     AdminUserSerializer, CategorySerializer, ProductLabelSerializer, ProductSerializer, ProductImageSerializer,
-    DiscountCodeSerializer, ProductDiscountSerializer, OrderSerializer, OrderItemSerializer, ServiceSerializer, NotificationSerializer
+    DiscountCodeSerializer, ProductDiscountSerializer, HealthSerializer,OrderSerializer, OrderItemSerializer, ServiceSerializer, NotificationSerializer
 )
 import csv
 from django.http import HttpResponse
@@ -244,3 +244,10 @@ class NotificationViewSet(viewsets.ModelViewSet):
         )
         
         return Response({'status': 'alerts sent'})
+  
+
+
+class HealthView():
+    def get(self, request):
+        data = {"status": "ok"}
+        return Response(data)

@@ -7,6 +7,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV DJANGO_SETTINGS_MODULE=flaky_fantasy_backend.settings
 
+RUN apt-get update && apt-get install -y curl
 
 # Set the working directory in the container
 WORKDIR /code
@@ -35,6 +36,8 @@ RUN python manage.py collectstatic --noinput
 # Expose the port the app runs on
 EXPOSE 8000
 
-
+# Healthcheck to ensure the application is running
+HEALTHCHECK --interval=30s --timeout=3s \
+    CMD curl -f http://localhost:8000/health/ || exit 1
 # Run migrations and start Gunicorn
 CMD ["sh", "-c", "python manage.py migrate && gunicorn --bind 0.0.0.0:8000 --worker-tmp-dir /dev/shm flaky_fantasy_backend.wsgi:application --workers 1 --timeout 120 --max-requests 1000"]

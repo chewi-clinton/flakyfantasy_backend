@@ -177,3 +177,8 @@ class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields = '__all__'
+
+class HealthSerializer(serializers.Serializer):
+    status = serializers.CharField()
+    database = serializers.CharField(required=False)
+    message = serializers.CharField(required=False)
