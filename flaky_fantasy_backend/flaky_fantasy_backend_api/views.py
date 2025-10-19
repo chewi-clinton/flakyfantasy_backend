@@ -1,4 +1,5 @@
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.views import APIView
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
@@ -246,8 +247,9 @@ class NotificationViewSet(viewsets.ModelViewSet):
         return Response({'status': 'alerts sent'})
   
 
-
-class HealthView():
+class HealthView(APIView):
     def get(self, request):
-        data = {"status": "ok"}
-        return Response(data)
+        try:
+            return Response({"status": "ok", "database": "connected"}, status=200)
+        except Exception as e:
+            return Response({"status": "error", "message": str(e)}, status=500)
