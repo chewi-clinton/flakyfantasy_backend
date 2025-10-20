@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from django.urls import reverse
+from django.utils.html import format_html
 
 class AdminUser(AbstractUser):
     ROLE_CHOICES = [
@@ -48,6 +50,14 @@ class Product(models.Model):
     def save(self, *args, **kwargs):
         self.in_stock = self.stock_quantity > 0
         super().save(*args, **kwargs)
+    
+    def get_absolute_url(self):
+        return reverse('product_detail', kwargs={'pk': self.pk})
+    
+    def clean(self):
+        # Check if there are images being added in the form
+        # This will be handled in the admin's clean method
+        pass
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
@@ -58,13 +68,11 @@ class ProductImage(models.Model):
     def __str__(self):
         return f"Image for {self.product.name}"
     
-    def clean(self):
-        if self.product:
-            images_count = self.product.images.count()
-            if not self.pk:
-                images_count += 1
-            if images_count < 1 or images_count > 5:
-                raise ValidationError('Product must have between 1 and 5 images.')
+    def image_tag(self):
+        if self.image:
+            return format_html('<img src="{}" width="50" height="50" />'.format(self.image.url))
+        return "No Image"
+    image_tag.short_description = 'Image'
 
 class DiscountCode(models.Model):
     code = models.CharField(max_length=50, unique=True)
