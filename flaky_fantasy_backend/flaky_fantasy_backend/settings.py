@@ -39,7 +39,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
     'http://192.168.3.1:5173',
-    'https://backend.flakyfantasy.com',
+    'https://flakyfantasy.com',
    'http://qgkogwksg8koskwwck00gc80.46.62.211.155.sslip.io',
    'http://q4os0o848g44kc804g8sgccw.46.62.211.155.sslip.io',
 ]
@@ -134,6 +134,6 @@ SIMPLE_JWT = {
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = 'no-reply@carebridge.com'
+DEFAULT_FROM_EMAIL = 'no-reply@flakyfantasy.com'
 
 AUTH_USER_MODEL = 'flaky_fantasy_backend_api.AdminUser'
