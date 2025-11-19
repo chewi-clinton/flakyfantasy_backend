@@ -53,6 +53,10 @@ CORS_ALLOW_HEADERS = [
     'origin',
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://flakyfantasy.com',          # Frontend domain
+    'https://backend.flakyfantasy.com',   # Backend domain
+]
 ROOT_URLCONF = 'flaky_fantasy_backend.urls'
 
 TEMPLATES = [
