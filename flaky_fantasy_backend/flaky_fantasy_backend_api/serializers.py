@@ -30,7 +30,7 @@ class ProductSerializer(serializers.ModelSerializer):
     labels = ProductLabelSerializer(many=True, read_only=True)
     category_name = serializers.CharField(source='category.name', read_only=True)
     
-    # New fields for direct image upload
+    
     image_files = serializers.ListField(
         child=serializers.ImageField(),
         write_only=True,
