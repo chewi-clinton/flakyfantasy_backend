@@ -40,9 +40,10 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:5173',
     'http://192.168.3.1:5173',
     'https://flakyfantasy.com',
-   'http://qgkogwksg8koskwwck00gc80.46.62.211.155.sslip.io',
-   'http://q4os0o848g44kc804g8sgccw.46.62.211.155.sslip.io',
+    'http://qgkogwksg8koskwwck00gc80.46.62.211.155.sslip.io',
+    'http://q4os0o848g44kc804g8sgccw.46.62.211.155.sslip.io',
 ]
+
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
 CORS_ALLOW_HEADERS = [
@@ -51,8 +52,11 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'accept',
     'origin',
+    'content-type',
 ]
 
+# Add this to handle preflight requests properly
+CORS_PREFLIGHT_MAX_AGE = 86400
 CSRF_TRUSTED_ORIGINS = [
     'https://flakyfantasy.com',          # Frontend domain
     'https://backend.flakyfantasy.com',   # Backend domain

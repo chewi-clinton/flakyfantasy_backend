@@ -14,6 +14,7 @@ class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImage
         fields = ['id', 'image', 'alt_text', 'is_primary']
+        read_only_fields = ['id']
 
 class ProductLabelSerializer(serializers.ModelSerializer):
     class Meta:

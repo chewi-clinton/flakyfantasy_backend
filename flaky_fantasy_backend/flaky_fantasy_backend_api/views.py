@@ -122,6 +122,23 @@ class ProductViewSet(viewsets.ModelViewSet):
         
         return Response({'status': 'primary image updated'})
 
+class ProductImageViewSet(viewsets.ModelViewSet):
+    queryset = ProductImage.objects.all()
+    serializer_class = ProductImageSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def perform_create(self, serializer):
+        product_id = self.request.data.get('product')
+        if not product_id:
+            raise serializers.ValidationError("Product ID is required")
+        
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            raise serializers.ValidationError("Product not found")
+        
+        serializer.save(product=product)
+
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
