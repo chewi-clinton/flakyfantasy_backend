@@ -30,7 +30,6 @@ class ProductSerializer(serializers.ModelSerializer):
     labels = ProductLabelSerializer(many=True, read_only=True)
     category_name = serializers.CharField(source='category.name', read_only=True)
     
-    
     image_files = serializers.ListField(
         child=serializers.ImageField(),
         write_only=True,
@@ -133,3 +132,47 @@ class ProductSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError("Product can have at most five images.")
         
         return data
+
+class DiscountCodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DiscountCode
+        fields = '__all__'
+
+class ProductDiscountSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source='product.name', read_only=True)
+    
+    class Meta:
+        model = ProductDiscount
+        fields = '__all__'
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source='product.name', read_only=True)
+    
+    class Meta:
+        model = OrderItem
+        fields = '__all__'
+
+class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Order
+        fields = '__all__'
+
+class ServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = '__all__'
+
+class NotificationSerializer(serializers.ModelSerializer):
+    recipient_name = serializers.CharField(source='recipient.username', read_only=True)
+    related_order_number = serializers.CharField(source='related_order.order_number', read_only=True)
+    
+    class Meta:
+        model = Notification
+        fields = '__all__'
+
+class HealthSerializer(serializers.Serializer):
+    status = serializers.CharField()
+    database = serializers.CharField(required=False)
+    message = serializers.CharField(required=False)
