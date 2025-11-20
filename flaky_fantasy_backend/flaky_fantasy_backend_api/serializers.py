@@ -34,7 +34,7 @@ class ProductSerializer(serializers.ModelSerializer):
     image_files = serializers.ListField(
         child=serializers.ImageField(),
         write_only=True,
-        required=False
+        required=False  # Changed from required to not required
     )
     primary_image_id = serializers.IntegerField(write_only=True, required=False)
     
@@ -57,7 +57,7 @@ class ProductSerializer(serializers.ModelSerializer):
         if labels:
             product.labels.set(labels)
         
-        # Create product images
+        # Create product images if any were provided
         for i, image_file in enumerate(image_files):
             is_primary = (i == 0) if primary_image_id is None else False
             image = ProductImage.objects.create(
@@ -70,7 +70,7 @@ class ProductSerializer(serializers.ModelSerializer):
                 image.save()
         
         # If primary_image_id is specified, set that image as primary
-        if primary_image_id and primary_image_id != image.id:
+        if primary_image_id and primary_image_id != image.id if 'image' in locals() else None:
             try:
                 primary_image = product.images.get(id=primary_image_id)
                 # Reset all images to non-primary first
@@ -121,64 +121,15 @@ class ProductSerializer(serializers.ModelSerializer):
         image_files = data.get('image_files', [])
         product = self.instance
         
-        # For new products, require at least one image
-        if not product and not image_files:
-            raise serializers.ValidationError("Product must have at least one image.")
-        
-        # For existing products, check if there would be at least one image after update
-        if product:
-            current_images = product.images.count()
-            total_images = current_images + len(image_files)
-            if total_images < 1:
-                raise serializers.ValidationError("Product must have at least one image.")
-            if total_images > 5:
-                raise serializers.ValidationError("Product can have at most five images.")
-        else:
-            if len(image_files) > 5:
-                raise serializers.ValidationError("Product can have at most five images.")
+        # Only validate image count if images are provided
+        if image_files:
+            if product:
+                current_images = product.images.count()
+                total_images = current_images + len(image_files)
+                if total_images > 5:
+                    raise serializers.ValidationError("Product can have at most five images.")
+            else:
+                if len(image_files) > 5:
+                    raise serializers.ValidationError("Product can have at most five images.")
         
         return data
-
-class DiscountCodeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DiscountCode
-        fields = '__all__'
-
-class ProductDiscountSerializer(serializers.ModelSerializer):
-    product_name = serializers.CharField(source='product.name', read_only=True)
-    
-    class Meta:
-        model = ProductDiscount
-        fields = '__all__'
-
-class OrderItemSerializer(serializers.ModelSerializer):
-    product_name = serializers.CharField(source='product.name', read_only=True)
-    
-    class Meta:
-        model = OrderItem
-        fields = '__all__'
-
-class OrderSerializer(serializers.ModelSerializer):
-    items = OrderItemSerializer(many=True, read_only=True)
-    
-    class Meta:
-        model = Order
-        fields = '__all__'
-
-class ServiceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Service
-        fields = '__all__'
-
-class NotificationSerializer(serializers.ModelSerializer):
-    recipient_name = serializers.CharField(source='recipient.username', read_only=True)
-    related_order_number = serializers.CharField(source='related_order.order_number', read_only=True)
-    
-    class Meta:
-        model = Notification
-        fields = '__all__'
-
-class HealthSerializer(serializers.Serializer):
-    status = serializers.CharField()
-    database = serializers.CharField(required=False)
-    message = serializers.CharField(required=False)
