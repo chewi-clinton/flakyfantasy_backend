@@ -35,10 +35,10 @@ class ProductLabel(models.Model):
 
 class Product(models.Model):
     name = models.CharField(max_length=200)
-    description = models.TextField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField(blank=True, null=True)  # Allow blank/null
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # Add default
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
-    labels = models.ManyToManyField(ProductLabel, blank=True)
+    labels = models.ManyToManyField(ProductLabel, blank=True)  # Already optional
     stock_quantity = models.PositiveIntegerField(default=0)
     in_stock = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
