@@ -6,9 +6,9 @@ load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = 'django-insecure-am5(5md1os1#x8m-7je5xzyy)exjl8#^hdcik_f4+!$%@)w#9k'
-DEBUG = True
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.3.1', '0.0.0.0','backend.flakyfantasy.com','qgkogwksg8koskwwck00gc80.46.62.211.155.sslip.io','http://q4os0o848g44kc804g8sgccw.46.62.211.155.sslip.io',]
+SECRET_KEY = os.getenv('SECRET_KEY', 'fallback-local-dev-key-only')
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -38,10 +38,8 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
-    'http://192.168.3.1:5173',
     'https://flakyfantasy.com',
-    'http://qgkogwksg8koskwwck00gc80.46.62.211.155.sslip.io',
-    'http://q4os0o848g44kc804g8sgccw.46.62.211.155.sslip.io',
+    'https://backend.flakyfantasy.com',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -52,15 +50,15 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'accept',
     'origin',
-    'content-type',
 ]
 
-# Add this to handle preflight requests properly
 CORS_PREFLIGHT_MAX_AGE = 86400
+
 CSRF_TRUSTED_ORIGINS = [
-    'https://flakyfantasy.com',          # Frontend domain
-    'https://backend.flakyfantasy.com',   # Backend domain
+    'https://flakyfantasy.com',
+    'https://backend.flakyfantasy.com',
 ]
+
 ROOT_URLCONF = 'flaky_fantasy_backend.urls'
 
 TEMPLATES = [
@@ -84,11 +82,14 @@ WSGI_APPLICATION = 'flaky_fantasy_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
+        'NAME': os.getenv('PGDATABASE'),
+        'USER': os.getenv('PGUSER'),
+        'PASSWORD': os.getenv('PGPASSWORD'),
+        'HOST': os.getenv('PGHOST'),
+        'PORT': os.getenv('PGPORT', '5432'),
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
     }
 }
 
