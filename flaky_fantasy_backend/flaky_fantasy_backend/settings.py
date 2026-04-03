@@ -9,7 +9,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.getenv('SECRET_KEY', 'fallback-local-dev-key-only')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-# Removed trailing dot, added localhost for internal Docker networking
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
 
 INSTALLED_APPS = [
@@ -27,9 +26,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -38,33 +37,31 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
     'https://flakyfantasy.com',
     'https://backend.flakyfantasy.com',
 ]
 
+CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
+CORS_EXPOSE_HEADERS = ['Content-Type', 'Content-Length']
 CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
 CORS_ALLOW_HEADERS = [
+    'accept',
     'authorization',
     'content-type',
+    'user-agent',
     'x-csrftoken',
-    'accept',
-    'origin',
+    'x-requested-with',
 ]
-CORS_PREFLIGHT_MAX_AGE = 86400
 
 CSRF_TRUSTED_ORIGINS = [
     'https://flakyfantasy.com',
     'https://backend.flakyfantasy.com',
 ]
 
-# === HTTPS & Media Fixes Added ===
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 
-# Force HTTPS for media URLs when not in debug
 if DEBUG:
     MEDIA_URL = '/media/'
 else:
@@ -72,12 +69,10 @@ else:
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Security headers (recommended for production)
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True if not DEBUG else False
 SECURE_HSTS_PRELOAD = True if not DEBUG else False
-# === End of HTTPS & Media Fixes ===
 
 ROOT_URLCONF = 'flaky_fantasy_backend.urls'
 
