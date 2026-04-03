@@ -8,6 +8,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'fallback-local-dev-key-only')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
+
 # Removed trailing dot, added localhost for internal Docker networking
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
 
@@ -52,13 +53,31 @@ CORS_ALLOW_HEADERS = [
     'accept',
     'origin',
 ]
-
 CORS_PREFLIGHT_MAX_AGE = 86400
 
 CSRF_TRUSTED_ORIGINS = [
     'https://flakyfantasy.com',
     'https://backend.flakyfantasy.com',
 ]
+
+# === HTTPS & Media Fixes Added ===
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+
+# Force HTTPS for media URLs when not in debug
+if DEBUG:
+    MEDIA_URL = '/media/'
+else:
+    MEDIA_URL = 'https://backend.flakyfantasy.com/media/'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Security headers (recommended for production)
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True if not DEBUG else False
+SECURE_HSTS_PRELOAD = True if not DEBUG else False
+# === End of HTTPS & Media Fixes ===
 
 ROOT_URLCONF = 'flaky_fantasy_backend.urls'
 
@@ -90,7 +109,7 @@ DATABASES = {
         'PORT': os.getenv('PGPORT', '5432'),
         'OPTIONS': {
             'sslmode': 'require',
-            'connect_timeout': 10,  # Added: Prevents infinite hanging on Neon cold starts
+            'connect_timeout': 10,
         },
     }
 }
@@ -109,9 +128,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -138,5 +154,4 @@ SIMPLE_JWT = {
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'no-reply@flakyfantasy.com'
-
 AUTH_USER_MODEL = 'flaky_fantasy_backend_api.AdminUser'
