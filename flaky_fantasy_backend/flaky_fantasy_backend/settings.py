@@ -1,4 +1,5 @@
 import os
+import re
 from dotenv import load_dotenv
 from datetime import timedelta
 
@@ -27,6 +28,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'flaky_fantasy_backend.middleware.CrossOriginResourcePolicyMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -53,6 +55,7 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
+CORS_URLS_REGEX = re.compile(r'^/(api|media)/.*$')
 
 CSRF_TRUSTED_ORIGINS = [
     'https://flakyfantasy.com',
