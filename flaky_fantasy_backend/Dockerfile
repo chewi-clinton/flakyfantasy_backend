@@ -29,4 +29,4 @@ RUN python manage.py collectstatic --noinput
 # Expose the port the app runs on
 EXPOSE 8000
 # Run migrations and start Gunicorn
-CMD ["sh", "-c", "python manage.py migrate && gunicorn --bind 0.0.0.0:8000 --worker-tmp-dir /dev/shm flaky_fantasy_backend.wsgi:application --workers 1 --timeout 120 --max-requests 1000"]
+CMD ["sh", "-c", "mkdir -p /code/media/products /code/media/services/icons /code/media/services/images && chmod -R 775 /code/media && python manage.py migrate && gunicorn --bind 0.0.0.0:8000 --worker-tmp-dir /dev/shm flaky_fantasy_backend.wsgi:application --workers 1 --timeout 120 --max-requests 1000"]
