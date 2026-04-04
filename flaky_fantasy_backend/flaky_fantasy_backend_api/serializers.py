@@ -29,81 +29,84 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True, read_only=True)
     labels = ProductLabelSerializer(many=True, read_only=True)
+    label_ids = serializers.PrimaryKeyRelatedField(
+        queryset=ProductLabel.objects.all(),
+        many=True,
+        write_only=True,
+        required=False,
+        source='labels'
+    )
     category_name = serializers.CharField(source='category.name', read_only=True)
-    
+
     image_files = serializers.ListField(
         child=serializers.ImageField(),
         write_only=True,
-        required=False  # Changed from required to not required
+        required=False
     )
     primary_image_id = serializers.IntegerField(write_only=True, required=False)
-    
+
     class Meta:
         model = Product
         fields = [
-            'id', 'name', 'description', 'price', 'category', 'labels', 
-            'stock_quantity', 'in_stock', 'created_at', 'updated_at',
+            'id', 'name', 'description', 'price', 'category', 'labels',
+            'label_ids', 'stock_quantity', 'in_stock', 'created_at', 'updated_at',
             'images', 'category_name', 'image_files', 'primary_image_id'
         ]
         read_only_fields = ('created_at', 'updated_at', 'in_stock')
-    
+
     def create(self, validated_data):
         image_files = validated_data.pop('image_files', [])
         primary_image_id = validated_data.pop('primary_image_id', None)
         labels = validated_data.pop('labels', [])
-        
+
         product = Product.objects.create(**validated_data)
-        
+
         if labels:
             product.labels.set(labels)
-        
-        # Create product images if any were provided
-        for i, image_file in enumerate(image_files):
-            is_primary = (i == 0) if primary_image_id is None else False
-            image = ProductImage.objects.create(
-                product=product, 
+
+        created_images = []
+        for image_file in image_files:
+            img = ProductImage.objects.create(
+                product=product,
                 image=image_file,
-                is_primary=is_primary
+                is_primary=False
             )
-            if image.id == primary_image_id:
-                image.is_primary = True
-                image.save()
-        
-        # If primary_image_id is specified, set that image as primary
-        if primary_image_id and primary_image_id != image.id if 'image' in locals() else None:
-            try:
-                primary_image = product.images.get(id=primary_image_id)
-                # Reset all images to non-primary first
-                product.images.update(is_primary=False)
-                primary_image.is_primary = True
-                primary_image.save()
-            except ProductImage.DoesNotExist:
-                pass
-        
+            created_images.append(img)
+
+        # Determine which image should be primary
+        if created_images:
+            primary = None
+            if primary_image_id is not None:
+                primary = next((img for img in created_images if img.id == primary_image_id), None)
+            if primary is None:
+                primary = created_images[0]
+            primary.is_primary = True
+            primary.save()
+
         return product
-    
+
     def update(self, instance, validated_data):
         image_files = validated_data.pop('image_files', [])
         primary_image_id = validated_data.pop('primary_image_id', None)
         labels = validated_data.pop('labels', None)
-        
+
         # Update product fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
-        
+
         # Update labels if provided
         if labels is not None:
             instance.labels.set(labels)
-        
+
         # Add new images if provided
         for image_file in image_files:
             ProductImage.objects.create(
-                product=instance, 
+                product=instance,
                 image=image_file,
                 is_primary=False
             )
-        
+
         # Set primary image if specified
         if primary_image_id is not None:
             try:
@@ -114,13 +117,13 @@ class ProductSerializer(serializers.ModelSerializer):
                 primary_image.save()
             except ProductImage.DoesNotExist:
                 pass
-        
+
         return instance
-    
+
     def validate(self, data):
         image_files = data.get('image_files', [])
         product = self.instance
-        
+
         # Only validate image count if images are provided
         if image_files:
             if product:
@@ -131,7 +134,7 @@ class ProductSerializer(serializers.ModelSerializer):
             else:
                 if len(image_files) > 5:
                     raise serializers.ValidationError("Product can have at most five images.")
-        
+
         return data
 
 class DiscountCodeSerializer(serializers.ModelSerializer):
@@ -141,21 +144,21 @@ class DiscountCodeSerializer(serializers.ModelSerializer):
 
 class ProductDiscountSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True)
-    
+
     class Meta:
         model = ProductDiscount
         fields = '__all__'
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True)
-    
+
     class Meta:
         model = OrderItem
         fields = '__all__'
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
-    
+
     class Meta:
         model = Order
         fields = '__all__'
@@ -168,7 +171,7 @@ class ServiceSerializer(serializers.ModelSerializer):
 class NotificationSerializer(serializers.ModelSerializer):
     recipient_name = serializers.CharField(source='recipient.username', read_only=True)
     related_order_number = serializers.CharField(source='related_order.order_number', read_only=True)
-    
+
     class Meta:
         model = Notification
         fields = '__all__'
